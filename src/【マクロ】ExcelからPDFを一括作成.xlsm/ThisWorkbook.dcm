@@ -1,0 +1,45 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "ThisWorkbook"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Sub ExcelToPDF()
+    
+    'ファイルシステムを扱うオブジェクトを作成する。
+    Set objFileSys = CreateObject("Scripting.FileSystemObject")
+    
+    Dim FileName As String
+    FileName = Dir(ThisWorkbook.Path & "\*.xlsx")
+    
+    'ログのクリア
+    ThisWorkbook.Worksheets(1).Range("M:M").Clear
+    Dim logRowIndex As Integer
+    logRowIndex = 2
+    
+    Do While FileName <> ""
+        '変換後のPDFファイル名を作成する。
+        FilePathPDF = ThisWorkbook.Path & "\" & objFileSys.GetBaseName(FileName) & ".pdf"
+        
+        'ファイルを開く。
+        Workbooks.Open FileName:=ThisWorkbook.Path & "\" & FileName
+        
+        'PDFへ変換する。
+        Workbooks(FileName).ExportAsFixedFormat 0, FilePathPDF
+        
+        'ファイルを閉じる。
+        Workbooks(FileName).Close
+        
+        ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = Now & vbTab & FileName & "をPDF化しました。"
+        logRowIndex = logRowIndex + 1
+        
+        '次のファイルを指定する。
+        FileName = Dir()
+    Loop
+    
+    Set objFileSys = Nothing
+    
+End Sub

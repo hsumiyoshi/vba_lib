@@ -1,0 +1,102 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "ThisWorkbook"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Sub CreateExcelCommentList()
+    'ファイルシステムを扱うオブジェクトを作成する。
+    Set objFileSys = CreateObject("Scripting.FileSystemObject")
+    
+    Const ROW_HEAD As Long = 1  ' コメント一覧の見出し行とする行番号
+ 
+    Dim cmnt As Comment
+    Dim cnt_sh As Long ' ワークシートの枚数
+    Dim num_row As Long ' コメントを一覧にして出力する行番号
+    Dim msg As String
+
+    ' コメント一覧を作成するシートの挿入と見出しの作成
+    Dim FileName As String
+    FileName = Dir(ThisWorkbook.Path & "\*.xlsx")
+    
+    sheetName = "コメント一覧_" & Format(Now, "yyyymmdd_hhmmss")
+    
+    'ログのクリア
+    ThisWorkbook.Worksheets(1).Range("M:M").Clear
+    Dim logRowIndex As Integer
+    logRowIndex = 2
+    
+    
+    Do While FileName <> ""
+
+        'ファイルを開く。
+        Workbooks.Open FileName:=ThisWorkbook.Path & "\" & FileName
+    
+        Workbooks(FileName).Worksheets.Add Before:=Workbooks(FileName).Worksheets(1)
+        Workbooks(FileName).Worksheets(1).Name = sheetName
+        Cells(ROW_HEAD, 1).Value = "No."
+        Cells(ROW_HEAD, 2).Value = "対象シート"
+        Cells(ROW_HEAD, 3).Value = "対象セル"
+        Cells(ROW_HEAD, 4).Value = "コメント内容"
+        Cells(ROW_HEAD, 5).Value = "処置内容"
+        Cells(ROW_HEAD, 6).Value = "処置者"
+        Cells(ROW_HEAD, 7).Value = "処置日"
+        Cells(ROW_HEAD, 8).Value = "確認者"
+        Cells(ROW_HEAD, 9).Value = "確認日"
+        
+        ' コメント一覧の作成
+        num_row = ROW_HEAD
+        For cnt_sh = 1 To Workbooks(FileName).Worksheets.Count
+            For Each cmnt In Workbooks(FileName).Worksheets(cnt_sh).Comments
+                num_row = num_row + 1
+                Cells(num_row, 1) = num_row - 1
+                Cells(num_row, 2).Value = Workbooks(FileName).Worksheets(cnt_sh).Name
+                Workbooks(FileName).Worksheets(1).Hyperlinks.Add _
+                    Anchor:=Cells(num_row, 3), Address:="", _
+                    SubAddress:="'" & Workbooks(FileName).Worksheets(cnt_sh).Name & "'!" & cmnt.Parent.Address(False, False), _
+                    TextToDisplay:="'" & Workbooks(FileName).Worksheets(cnt_sh).Name & "'!" & cmnt.Parent.Address(False, False)
+                Cells(num_row, 4).Value = cmnt.Text
+            Next cmnt
+        Next cnt_sh
+
+        msg = ""
+        If num_row = ROW_HEAD Then
+            ' コメントが存在しないときに挿入したコメント一覧用シートを削除
+            Application.DisplayAlerts = False
+            Workbooks(FileName).Worksheets(sheetName).Delete
+            Application.DisplayAlerts = True
+            msg = "コメントは存在しませんでした。"
+        Else
+            'セル幅の設定
+            Workbooks(FileName).Worksheets(1).Range("A:I").EntireColumn.AutoFit
+            Workbooks(FileName).Worksheets(1).Columns("D:E").ColumnWidth = 50
+            Workbooks(FileName).Worksheets(1).Columns("F:I").ColumnWidth = 10
+            Workbooks(FileName).Worksheets(1).Range("A1:I1").HorizontalAlignment = xlCenter
+            Workbooks(FileName).Worksheets(1).Range("A" & num_row).Rows.AutoFit
+            'セル色の設定
+            Workbooks(FileName).Worksheets(1).Range("A1:I1").Interior.Color = RGB(226, 239, 218)
+            '罫線を引く
+            Workbooks(FileName).Worksheets(1).Range("A1:I" & num_row).Borders.LineStyle = True
+            
+            msg = num_row - 1 & "件のコメントが存在しました。対象ファイルのシート「" & Workbooks(FileName).Worksheets(sheetName).Name & "」を確認してください。"
+        End If
+        
+        ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = FileName & "：" & msg
+        logRowIndex = logRowIndex + 1
+            
+        'ファイルを閉じる。
+        Workbooks(FileName).Close SaveChanges:=True
+        
+        '次のファイルを指定する。
+        FileName = Dir()
+        
+    Loop
+    
+    ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = "処理が終了しました。"
+    
+    Set objFileSys = Nothing
+End Sub
+

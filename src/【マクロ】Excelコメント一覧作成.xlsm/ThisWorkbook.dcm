@@ -20,7 +20,7 @@ Sub CreateExcelCommentList()
 
     ' コメント一覧を作成するシートの挿入と見出しの作成
     Dim FileName As String
-    FileName = Dir(ThisWorkbook.Path & "\*.xlsx")
+    FileName = Dir(ThisWorkbook.Path & "\*")
     
     sheetName = "コメント一覧_" & Format(Now, "yyyymmdd_hhmmss")
     
@@ -31,6 +31,12 @@ Sub CreateExcelCommentList()
     
     
     Do While FileName <> ""
+        If FileName = ThisWorkbook.Name Or _
+         (Right(FileName, 5) <> ".xlsx" And Right(FileName, 5) <> ".xlsm" And Right(FileName, 4) <> ".xls") Then
+            ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = FileName & "の処理はスキップしました。"
+            logRowIndex = logRowIndex + 1
+            Goto Continue
+        End If
 
         'ファイルを開く。
         Workbooks.Open FileName:=ThisWorkbook.Path & "\" & FileName
@@ -89,6 +95,8 @@ Sub CreateExcelCommentList()
             
         'ファイルを閉じる。
         Workbooks(FileName).Close SaveChanges:=True
+        
+        Continue:
         
         '次のファイルを指定する。
         FileName = Dir()

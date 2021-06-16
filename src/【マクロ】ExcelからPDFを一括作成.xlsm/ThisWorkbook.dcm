@@ -13,7 +13,7 @@ Sub ExcelToPDF()
     Set objFileSys = CreateObject("Scripting.FileSystemObject")
     
     Dim FileName As String
-    FileName = Dir(ThisWorkbook.Path & "\*.xlsx")
+    FileName = Dir(ThisWorkbook.Path & "\*")
     
     'ログのクリア
     ThisWorkbook.Worksheets(1).Range("M:M").Clear
@@ -21,6 +21,13 @@ Sub ExcelToPDF()
     logRowIndex = 2
     
     Do While FileName <> ""
+        If FileName = ThisWorkbook.Name Or _
+         (Right(FileName, 5) <> ".xlsx" And Right(FileName, 5) <> ".xlsm" And Right(FileName, 4) <> ".xls") Then
+            ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = FileName & "の処理はスキップしました。"
+            logRowIndex = logRowIndex + 1
+            Goto Continue
+        End If
+
         '変換後のPDFファイル名を作成する。
         FilePathPDF = ThisWorkbook.Path & "\" & objFileSys.GetBaseName(FileName) & ".pdf"
         
@@ -36,6 +43,8 @@ Sub ExcelToPDF()
         ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = Now & vbTab & FileName & "をPDF化しました。"
         logRowIndex = logRowIndex + 1
         
+        Continue:
+
         '次のファイルを指定する。
         FileName = Dir()
     Loop

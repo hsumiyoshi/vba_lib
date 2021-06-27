@@ -25,7 +25,7 @@ Sub ExcelToPDF()
          (Right(FileName, 5) <> ".xlsx" And Right(FileName, 5) <> ".xlsm" And Right(FileName, 4) <> ".xls") Then
             ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = FileName & "の処理はスキップしました。"
             logRowIndex = logRowIndex + 1
-            Goto Continue
+            GoTo Continue
         End If
 
         '変換後のPDFファイル名を作成する。
@@ -43,7 +43,7 @@ Sub ExcelToPDF()
         ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = Now & vbTab & FileName & "をPDF化しました。"
         logRowIndex = logRowIndex + 1
         
-        Continue:
+Continue:
 
         '次のファイルを指定する。
         FileName = Dir()
@@ -52,3 +52,5 @@ Sub ExcelToPDF()
     Set objFileSys = Nothing
     
 End Sub
+
+

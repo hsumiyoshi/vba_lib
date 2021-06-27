@@ -2,9 +2,9 @@ VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} UserForm 
    Caption         =   "UserForm1"
    ClientHeight    =   3396
-   ClientLeft      =   -300
-   ClientTop       =   -996
-   ClientWidth     =   4980
+   ClientLeft      =   -396
+   ClientTop       =   -1356
+   ClientWidth     =   2028
    OleObjectBlob   =   "UserForm.frx":0000
    StartUpPosition =   1  'オーナー フォームの中央
 End
@@ -13,6 +13,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+
 
 '一括設定処理
 Private Sub LockButton_Click()
@@ -60,8 +62,8 @@ Private Sub unlockButton_Click()
     
     'ファイルを開く
     On Error Resume Next
-    Dim wb As Workbook    
-    Set wb = Workbooks.Open(ThisWorkbook.Path & "\" & FileName, Password:=password, WriteResPassword:=password)
+    Dim wb As Workbook
+    Set wb = Workbooks.Open(ThisWorkbook.Path & "\" & FileName, password:=password, WriteResPassword:=password)
     
     'ファイルオープンエラーの場合、対象ファイルをスキップする。
     If Err.Number <> 0 Then
@@ -72,11 +74,11 @@ Private Sub unlockButton_Click()
     
     '対象ファイルが保護されている場合解除する。
     If wb.ProtectWindows = True Then
-      wb.Unprotect Password:=password
+      wb.Unprotect password:=password
     End If
     
     'パスワードを解除して上書きして閉じる。
-    wb.SaveAs savePath & "\sumiyoshi_" & FileName, Password:=""
+    wb.SaveAs savePath & "\sumiyoshi_" & FileName, password:=""
     Call OutputLog(ws, FileName & " unlocked.", logRowIndex)
     Call CloseFile(wb)
   
@@ -104,6 +106,6 @@ End Function
 ' message:ログ内容
 ' rowNumber:ログの出力位置の行番号
 Function OutputLog(ByRef ws As Worksheet, ByVal message As String, ByRef rowNumber As Integer)
-  ws.Cells(rowNumber, 2).Value = message  
+  ws.Cells(rowNumber, 2).Value = message
   rowNumber = rowNumber + 1
 End Function

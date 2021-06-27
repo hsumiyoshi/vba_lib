@@ -1,0 +1,74 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+END
+Attribute VB_Name = "ThisWorkbook"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = True
+Option Explicit
+
+Sub SendMails()
+    Dim address As String
+    Dim subject As String, body As String
+    Dim username As String, tsuchi As String
+    Dim ws As Worksheet
+    Dim cmax As Long
+    Dim i As Long
+    Dim txtfile As String, txtpath As String, attachedfile As String
+    Dim txt As TextStream
+    
+    Dim fs As Scripting.FileSystemObject
+    Set fs = New Scripting.FileSystemObject
+    
+    'todo update mail body text.
+    txtfile = "週報確認.txt"
+    txtpath = ThisWorkbook.Pah & "\" & txtfile
+    Set txt = fs.OpenTextFile(Filename:=txtpath, IOMode:=ForReading)
+    
+    subject = Split(txtfile, ".")(0)
+    
+    Set ws = Worksheets("メールリスト")
+    
+    cmax = ws.Range("A65536").End(xlUp).Row
+    
+    Dim OutlookObj As Outlook.Application
+    Dim myMail As Outlook.MailItem
+    Set OutlookObj = CreateObject("Outlook.Application")
+    
+    For i = 2 To cmax
+      tsuchi = ws.Range("E" & i).Value
+      username = ws.Range("C" & i).Value
+      Dim Filename As String
+      Filename = "*" & username & "*"
+      attachedfile = Dir(ThisWorkbook.Path & "\" & Filename, vbNormal)
+      
+      If tsuchi = "ON" And attachedfile <> "" Then
+        Set txt = fs.OpenTextFile(Filename:=txtpath, IOMode:=ForReading)
+        body = Replace(txt.ReadAll, "{名前}", username)
+        address = ws.Range("D" & i).Value
+        
+        Set myMail = OutlookObj.createItem(olMailItem)
+        
+        'todo update
+        myMail.SendUsingAccount = Session.Accounts("senddomain@sample.com")
+        myMail.BodyFormat = 3
+        myMail.To = address
+        myMail.CC = "ccdomain@sample.com"
+        myMail.subject = subject
+        myMail.body = body
+        myMail.Attachments.Add (ThisWorkbook.Path & "\" & attachedfile)
+        
+        'myMail.Display
+        myMail.Send
+        ws.Range("F" & i).Value = "送信完了:" & Now()
+        ws.Range("G" & i).Value = attachedfile
+        
+        Set txt = Nothing
+        Set myMail = Nothing
+      End If
+    Next
+    Set OutlookObj = Nothing
+    
+End Sub

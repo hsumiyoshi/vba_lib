@@ -35,7 +35,7 @@ Sub CreateExcelCommentList()
          (Right(FileName, 5) <> ".xlsx" And Right(FileName, 5) <> ".xlsm" And Right(FileName, 4) <> ".xls") Then
             ThisWorkbook.Worksheets(1).Cells(logRowIndex, 13).Value = FileName & "の処理はスキップしました。"
             logRowIndex = logRowIndex + 1
-            Goto Continue
+            GoTo Continue
         End If
 
         'ファイルを開く。
@@ -96,7 +96,7 @@ Sub CreateExcelCommentList()
         'ファイルを閉じる。
         Workbooks(FileName).Close SaveChanges:=True
         
-        Continue:
+Continue:
         
         '次のファイルを指定する。
         FileName = Dir()
@@ -107,4 +107,6 @@ Sub CreateExcelCommentList()
     
     Set objFileSys = Nothing
 End Sub
+
+
 

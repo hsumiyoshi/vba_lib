@@ -45,7 +45,7 @@ Private Sub unlockButton_Click()
   
   '解除ファイル出力先の設定
   Dim savePath As String
-  savePath = ThisWorkbook.Path & "\解除後"
+  savePath = ThisWorkbook.Path & "\unlock"
   If Not objFileSys.FolderExists(savePath) Then objFileSys.CreateFolder savePath
 
   '処理開始
@@ -76,7 +76,7 @@ Private Sub unlockButton_Click()
     End If
     
     'パスワードを解除して上書きして閉じる。
-    wb.SaveAs savePath & "\確認用_" & FileName, Password:=""
+    wb.SaveAs savePath & "\sumiyoshi_" & FileName, Password:=""
     Call OutputLog(ws, FileName & " unlocked.", logRowIndex)
     Call CloseFile(wb)
   
